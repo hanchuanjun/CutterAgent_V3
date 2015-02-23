@@ -3,33 +3,43 @@
 
 #include <QThread>
 #include "Global.h"
-#include "cutteroptlog.h"
-#include "cuttermonthlyrpt.h"
-#include "cutterdailyrpt.h"
-#include "utiities/JSonRpcSvc.h"
+#include <QNetworkAccessManager>
+#include <QNetworkReply>
+#include <QNetworkRequest>
+#include "log4qt/consoleappender.h"
+#include "log4qt/logger.h"
+#include "log4qt/ttcclayout.h"
+#include "data/cutteroptlog.h"
+#include "data/cuttermonthlyrpt.h"
+#include "data/cutterdailyrpt.h"
 class CutterOptPrc : public QThread
 {
     Q_OBJECT
 public:
-    explicit CutterOptPrc();
+    explicit CutterOptPrc(QObject *parent = 0);
     void setGlobal(Global *global);
 
     void run();
+    bool post(const QString urlStr,QMap<QString,QString> &map);
 
 signals:
-    void handled(const QString &msg);
+   // void handled(const QString &msg);
 private:
     Global *global;
-    JSonRpcSvc  http;
+    QNetworkAccessManager *accessManager;
+    QNetworkReply *reply;
+    QString evtid;
     //当前是否在上传报警，如果是，则不能处理下一个文件
     bool isProcessing;
 
     void checkOptLogs();
     void handleOptLog(const QString &filename,CutterOptLog *log,CutterDailyRpt *drpt,CutterMonthlyRpt *mrpt);
     bool uploadOptLog(const QString &filename,CutterOptLog *log,CutterDailyRpt *drpt,CutterMonthlyRpt *mrpt);
-
-public slots:
     void postedOptLog(bool ok,QString transid,QString result);
+public slots:
+    //void postedOptLog(bool ok,QString transid,QString result);
+    void readyRead();
+    void finished();
 
 };
 

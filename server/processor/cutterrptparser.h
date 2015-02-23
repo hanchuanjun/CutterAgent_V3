@@ -2,10 +2,13 @@
 #define CUTTERRPTPARSER_H
 
 #include <QString>
-#include "cuttermonthlyrpt.h"
-#include "cutterdailyrpt.h"
-#include "CutterAltLog.h"
-#include "cutteroptlog.h"
+#include "data/cuttermonthlyrpt.h"
+#include "data/cutterdailyrpt.h"
+#include "data/CutterAltLog.h"
+#include "data/cutteroptlog.h"
+#include "log4qt/consoleappender.h"
+#include "log4qt/logger.h"
+#include "log4qt/ttcclayout.h"
 #include <QStringList>
 #include <QFile>
 #include <QTextStream>

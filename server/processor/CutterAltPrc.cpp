@@ -6,21 +6,23 @@
 #include <QMap>
 #include <QDebug>
 
-#include "cutteraltlog.h"
+#include "data/cutteraltlog.h"
 #include "cutterrptparser.h"
-#include "Utility.h"
+#include "utilities/Utility.h"
 
 //CutterAltPrc::CutterAltPrc(QString &p,QString &u)
 //{
 //    path=p;
 //    url=u;
 //}
-CutterAltPrc::CutterAltPrc()
+CutterAltPrc::CutterAltPrc(QObject *parent) :
+    QThread(parent)
 {
     this->isProcessing=false;
-    connect(&http,SIGNAL(httpDone(const bool ,const QString ,const QString )),this,SLOT(postedAlt(bool ,QString ,QString)));
+    //connect(&http,SIGNAL(httpDone(const bool ,const QString ,const QString )),this,SLOT(postedAlt(bool ,QString ,QString)));
 }
 void CutterAltPrc::run(){
+    this->accessManager = new QNetworkAccessManager();
     int i=0;
     while (true){
         if (this->isProcessing == false){
@@ -92,8 +94,9 @@ bool CutterAltPrc::uploadEvt(const QString &filename,CutterAltLog *log)
     map.insert("eid","1001000000");//global->eid);
     map.insert("evt_type","99");
     map.insert("content",log->toString());
-    QUrl url(global->alrtUrl);
-    http.post(url,map);
+    //QUrl url(global->alrtUrl);
+   // http.post(url,map);
+    this->post(global->alrtUrl,map);
     map.clear();
     //emit handled(log->toString());
     qDebug()<<log->toString()<<endl;
@@ -138,5 +141,83 @@ void CutterAltPrc::postedAlt(bool ok,QString transid,QString result){
     }
     this->isProcessing=false;
     qDebug()<<str<<endl;
-    emit handled(str);
+    //emit handled(str);
+}
+
+bool CutterAltPrc::post(const QString urlStr,QMap<QString,QString> &map){
+
+    //this->isFilished = false;
+    QString params = "";
+    QString key,value;
+    QList<QString> list = map.keys();
+    QListIterator<QString> i(list);
+
+    while (i.hasNext()){
+        key=i.next();
+        value=map.value(key);
+        params.append(key).append("=").append(value);
+        if (key.toLower() == "evtid"){
+            evtid= value;
+        }
+        if (i.hasNext()){
+            params.append("&");
+        }
+    }
+
+    params = params.replace(" ","%20");
+
+
+     QUrl url(urlStr+"?"+params);
+       // QUrl url("http://www.google.com/d.html?"+params);
+
+      reply=accessManager->get(QNetworkRequest(url));
+      connect(reply, SIGNAL(finished()), this, SLOT(finished()));
+      connect(reply, SIGNAL(readyRead()), this, SLOT(readyRead()));
+
+
+      this->isProcessing = true;
+      this->exec();
+    return true;
+
+}
+
+void CutterAltPrc::readyRead(){
+
+    //cout<<"result:"<<text<<endl;
+    printf("ReadyRead result:");
+}
+
+void CutterAltPrc::finished(){
+
+    //cout<<"result:"<<text<<endl;;
+    //获取响应的信息，状态码为200表示正常
+      QVariant status_code = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute);
+
+      QString result;
+      bool isOk=true;
+      //无错误返回
+      if(reply->error() == QNetworkReply::NoError)
+      {
+          QByteArray bytes = reply->readAll();
+          result.append(bytes);  //转化为字符串
+          qDebug()<<result<<endl;
+        }
+        else
+        {
+          //处理错误
+          isOk=false;
+          result="error";
+        }
+
+        reply->deleteLater();//要删除reply，但是不能在repyfinished里直接delete，要调用deletelater;
+
+       // if (this->isFilished){
+            //emit httpDone(!isOk,evtid,result);
+       // }
+
+        this->postedAlt(isOk,evtid,result);
+        this->exit();
+
+        this->isProcessing=false;
+        qDebug()<<"finished:"<<status_code.toInt()<<endl;
 }

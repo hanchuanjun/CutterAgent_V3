@@ -5,14 +5,16 @@
 #include <QDir>
 #include <QDebug>
 
-#include "utility.h"
+#include "utilities/Utility.h"
 
-CutterOptPrc::CutterOptPrc()
+CutterOptPrc::CutterOptPrc(QObject *parent) :
+    QThread(parent)
 {
     this->isProcessing=false;
-    connect(&http,SIGNAL(httpDone(const bool ,const QString ,const QString)),this,SLOT(postedOptLog(bool ,QString , QString)));
+    //connect(&http,SIGNAL(httpDone(const bool ,const QString ,const QString)),this,SLOT(postedOptLog(bool ,QString , QString)));
 }
 void CutterOptPrc::run(){
+    this->accessManager = new QNetworkAccessManager();
 
     int i=0;
     while (true){
@@ -113,8 +115,8 @@ bool CutterOptPrc::uploadOptLog(const QString &filename,CutterOptLog *log,Cutter
     map.insert("content",log->toString());
     map.insert("content1",drpt->toString());
     map.insert("content2",mrpt->toString());
-    QUrl url(global->alrtUrl);
-    http.post(url,map);
+
+    this->post(global->alrtUrl,map);
 
     //emit handled(log->toString());
     return true;
@@ -160,5 +162,83 @@ void CutterOptPrc::postedOptLog(bool ok,QString transid,QString result){
             str =QString("Post %1.evt %2, failed to %3 %4!").arg(transid).arg("ok").arg("delete").arg(result);
     }
     this->isProcessing=false;
-    emit handled(str);
+    //emit handled(str);
+}
+
+bool CutterOptPrc::post(const QString urlStr,QMap<QString,QString> &map){
+
+    //this->isFilished = false;
+    QString params = "";
+    QString key,value;
+    QList<QString> list = map.keys();
+    QListIterator<QString> i(list);
+
+    while (i.hasNext()){
+        key=i.next();
+        value=map.value(key);
+        params.append(key).append("=").append(value);
+        if (key.toLower() == "evtid"){
+            evtid= value;
+        }
+        if (i.hasNext()){
+            params.append("&");
+        }
+    }
+
+    params = params.replace(" ","%20");
+
+
+     QUrl url(urlStr+"?"+params);
+       // QUrl url("http://www.google.com/d.html?"+params);
+
+      reply=accessManager->get(QNetworkRequest(url));
+      connect(reply, SIGNAL(finished()), this, SLOT(finished()));
+      connect(reply, SIGNAL(readyRead()), this, SLOT(readyRead()));
+
+
+      this->isProcessing = true;
+      this->exec();
+    return true;
+
+}
+
+void CutterOptPrc::readyRead(){
+
+    //cout<<"result:"<<text<<endl;
+    printf("ReadyRead result:");
+}
+
+void CutterOptPrc::finished(){
+
+    //cout<<"result:"<<text<<endl;;
+    //获取响应的信息，状态码为200表示正常
+      QVariant status_code = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute);
+
+      QString result;
+      bool isOk=true;
+      //无错误返回
+      if(reply->error() == QNetworkReply::NoError)
+      {
+          QByteArray bytes = reply->readAll();
+          result.append(bytes);  //转化为字符串
+          qDebug()<<result<<endl;
+        }
+        else
+        {
+          //处理错误
+          isOk=false;
+          result="error";
+        }
+
+        reply->deleteLater();//要删除reply，但是不能在repyfinished里直接delete，要调用deletelater;
+
+       // if (this->isFilished){
+            //emit httpDone(!isOk,evtid,result);
+       // }
+
+        this->postedOptLog(isOk,evtid,result);
+        this->exit();
+
+        this->isProcessing=false;
+        qDebug()<<"finished:"<<status_code.toInt()<<endl;
 }

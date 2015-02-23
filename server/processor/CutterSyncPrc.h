@@ -3,9 +3,13 @@
 
 #include <QThread>
 #include <QString>
-
+#include <QNetworkAccessManager>
+#include <QNetworkReply>
+#include <QNetworkRequest>
+#include "log4qt/consoleappender.h"
+#include "log4qt/logger.h"
+#include "log4qt/ttcclayout.h"
 #include "Global.h"
-#include "utiities/JSonRpcSvc.h"
 
 class CutterSyncPrc : public QThread
 {

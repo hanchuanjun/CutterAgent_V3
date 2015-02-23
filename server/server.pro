@@ -17,6 +17,7 @@ SOURCES  = main.cpp \
     utilities/Utility.cpp
 
 
+include(../../log4qt/src/log4qt/log4qt.pri)
 include(../../qt-solutions/qtservice/src/qtservice.pri)
 
 HEADERS += \

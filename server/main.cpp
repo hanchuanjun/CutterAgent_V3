@@ -46,6 +46,13 @@
 #include <QStringList>
 #include <QDir>
 #include <QSettings>
+#include <CutterAgentSvc.h>
+#include "log4qt/consoleappender.h"
+#include "log4qt/logger.h"
+#include "log4qt/ttcclayout.h"
+#include "log4qt/basicconfigurator.h"
+#include "log4qt/dailyrollingfileappender.h"
+#include "log4qt/propertyconfigurator.h"
 
 #include "qtservice.h"
 
@@ -160,6 +167,10 @@ protected:
             app->quit();
         }
     }
+    void processCommand(int code){
+        logMessage(QString("Recieve command: %1").arg(code), QtServiceBase::Information);
+
+    }
 
     void pause()
     {
@@ -179,6 +190,17 @@ private:
 
 int main(int argc, char **argv)
 {
+    // Create a layout
+/*    Log4Qt::BasicConfigurator::configure();
+        Log4Qt::Logger * log = Log4Qt::Logger::rootLogger();
+
+        log->debug("Hello DbZhang800!");
+        log->info("Hello Qt!");
+        log->warn("Hello 1+1=2");
+*/
+
+
+/*
 #if !defined(Q_OS_WIN)
     // QtService stores service settings in SystemScope, which normally require root privileges.
     // To allow testing this example as non-root, we change the directory of the SystemScope settings file.
@@ -187,4 +209,17 @@ int main(int argc, char **argv)
 #endif
     HttpService service(argc, argv);
     return service.exec();
+    */
+
+
+    QCoreApplication a(argc, argv);
+
+    Log4Qt::PropertyConfigurator::configure(a.applicationDirPath() + "/log.conf");
+
+
+
+        CutterAgentSvc svc;
+        svc.init();
+Log4Qt::Logger::logger(QLatin1String("My Logger"))->info("#########################Hello World!");
+        return a.exec();
 }

@@ -11,7 +11,7 @@
 #include <QSettings>
 #include <QNetworkAccessManager>
 
-#include "Utility.h"
+#include "utilities/Utility.h"
 
 CutterSyncPrc::CutterSyncPrc(QObject *parent) :
     QThread(parent)
