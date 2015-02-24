@@ -53,6 +53,7 @@
 #include "log4qt/basicconfigurator.h"
 #include "log4qt/dailyrollingfileappender.h"
 #include "log4qt/propertyconfigurator.h"
+#include "log4qt/level.h"
 
 #include "qtservice.h"
 
@@ -137,13 +138,13 @@ private:
     bool disabled;
 };
 
-class HttpService : public QtService<QCoreApplication>
+class CutterAgentService : public QtService<QCoreApplication>
 {
 public:
-    HttpService(int argc, char **argv)
-	: QtService<QCoreApplication>(argc, argv, "Qt HTTP Daemon")
+    CutterAgentService(int argc, char **argv)
+    : QtService<QCoreApplication>(argc, argv, "Cutter Agent Daemon")
     {
-        setServiceDescription("A dummy HTTP service implemented with Qt");
+        setServiceDescription("An application of Yingroup, Don't stop it!");
         setServiceFlags(QtServiceBase::CanBeSuspended);
     }
 
@@ -152,38 +153,36 @@ protected:
     {
         QCoreApplication *app = application();
 
-#if QT_VERSION < 0x040100
-        quint16 port = (app->argc() > 1) ?
-                QString::fromLocal8Bit(app->argv()[1]).toUShort() : 8080;
-#else
-        const QStringList arguments = QCoreApplication::arguments();
-        quint16 port = (arguments.size() > 1) ?
-                arguments.at(1).toUShort() : 8080;
-#endif
-        daemon = new HttpDaemon(port, app);
+        Log4Qt::Logger::logger(QLatin1String("Service"))->info("The service is starting ...!");
 
-        if (!daemon->isListening()) {
-            logMessage(QString("Failed to bind to port %1").arg(daemon->serverPort()), QtServiceBase::Error);
-            app->quit();
-        }
+        daemon = new CutterAgentSvc();
+        daemon->init();
+
+
     }
+
     void processCommand(int code){
         logMessage(QString("Recieve command: %1").arg(code), QtServiceBase::Information);
+        Log4Qt::Logger::logger(QLatin1String("Service"))->info(QString("Recieve command: %1").arg(code));
+        if (code <=0){
+            //logger()->setLevel(Level:);
+        }else {
 
+        }
     }
 
     void pause()
     {
-	daemon->pause();
+    //daemon->pause();
     }
 
     void resume()
     {
-	daemon->resume();
+    //daemon->resume();
     }
 
 private:
-    HttpDaemon *daemon;
+    CutterAgentSvc *daemon;
 };
 
 #include "main.moc"
@@ -200,26 +199,33 @@ int main(int argc, char **argv)
 */
 
 
-/*
+
+    QCoreApplication a(argc, argv);
 #if !defined(Q_OS_WIN)
     // QtService stores service settings in SystemScope, which normally require root privileges.
     // To allow testing this example as non-root, we change the directory of the SystemScope settings file.
     QSettings::setPath(QSettings::NativeFormat, QSettings::SystemScope, QDir::tempPath());
     qWarning("(Example uses dummy settings file: %s/QtSoftware.conf)", QDir::tempPath().toLatin1().constData());
 #endif
-    HttpService service(argc, argv);
+    Log4Qt::PropertyConfigurator::configure(a.applicationDirPath() + "/log.conf");
+
+
+    Log4Qt::Logger::logger(QLatin1String("main"))->info("The Application is starting ...!");
+
+
+    CutterAgentService service(argc, argv);
     return service.exec();
-    */
 
 
+/*
     QCoreApplication a(argc, argv);
 
     Log4Qt::PropertyConfigurator::configure(a.applicationDirPath() + "/log.conf");
 
+    CutterAgentSvc svc;
+    svc.init();
+    Log4Qt::Logger::logger(QLatin1String("main"))->info("#########################Hello World!");
 
-
-        CutterAgentSvc svc;
-        svc.init();
-Log4Qt::Logger::logger(QLatin1String("My Logger"))->info("#########################Hello World!");
-        return a.exec();
+    return a.exec();
+    */
 }

@@ -18,13 +18,15 @@ class CutterAgentSvc : public QObject
     LOG4QT_DECLARE_QCLASS_LOGGER
 public:
     explicit CutterAgentSvc(QObject *parent = 0);
-    Global *conf;// This is available in all editors.
     void init();
+    void shutdown();
 signals:
 
 public slots:
     void showMsg(const QString &msg);
 private:
+
+    Global *conf;// This is available in all editors.
     CutterSyncPrc *licProcessor;
     CutterAltPrc *altProcessor;
     CutterOptPrc *optProcessor;

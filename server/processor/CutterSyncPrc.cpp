@@ -24,24 +24,28 @@ void CutterSyncPrc::setGlobal(Global *global){
 }
 
 void CutterSyncPrc::run(){
-
+    logger()->info("CutterSyncPrc is starting....");
     this->accessManager = new QNetworkAccessManager();
 
     //connect(this,SIGNAL(httpDone(const bool ,const QString,const QString )),this,SLOT(synced(bool ,QString,QString )));
 
 
-    while (true){
-        qDebug()<<"**************  1  *************************sleep 20,this.isProcssing="<<this->isProcessing<<endl;
-
-        if (this->isProcessing == false){
-            //同步授权
-            this->checkMO();
-
+    int count = 0;
+    while (!this->global->needTerminate){
+        if (count % 30 == 0){
+            if (this->isProcessing == false){
+                //同步授权
+                this->checkMO();
+            }
         }
-        qDebug()<<"**************  2  *************************sleep 20,this.isProcssing="<<this->isProcessing<<endl;
         //
-        this->sleep(300);
+        this->sleep(10);
+        count ++;
+        if (count >= 86400){
+            count =0;
+        }
     }
+    logger()->info("CutterSyncPrc is stopping....");
 }
 
 

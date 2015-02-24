@@ -14,6 +14,7 @@
 class CutterSyncPrc : public QThread
 {
     Q_OBJECT
+    LOG4QT_DECLARE_QCLASS_LOGGER
 public:
     explicit CutterSyncPrc(QObject *parent = 0);
     void setGlobal(Global *global);

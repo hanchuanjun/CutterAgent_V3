@@ -14,6 +14,7 @@
 class CutterAltPrc : public QThread
 {
     Q_OBJECT
+    LOG4QT_DECLARE_QCLASS_LOGGER
 public:
     explicit CutterAltPrc(QObject *parent = 0);//QString &p,QString &u);
     void setGlobal(Global *global);

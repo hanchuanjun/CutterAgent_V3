@@ -15,6 +15,7 @@
 class CutterOptPrc : public QThread
 {
     Q_OBJECT
+    LOG4QT_DECLARE_QCLASS_LOGGER
 public:
     explicit CutterOptPrc(QObject *parent = 0);
     void setGlobal(Global *global);

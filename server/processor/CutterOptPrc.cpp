@@ -14,16 +14,19 @@ CutterOptPrc::CutterOptPrc(QObject *parent) :
     //connect(&http,SIGNAL(httpDone(const bool ,const QString ,const QString)),this,SLOT(postedOptLog(bool ,QString , QString)));
 }
 void CutterOptPrc::run(){
+    logger()->info("CutteOptPrc is starting....");
     this->accessManager = new QNetworkAccessManager();
 
     int i=0;
-    while (true){
+    while (!this->global->needTerminate){
         if (this->isProcessing == false){
             checkOptLogs();
 
         }
         this->sleep(10);
     }
+
+    logger()->info("CutterOptPrc is stopping....");
 }
 
 void CutterOptPrc::checkOptLogs(){

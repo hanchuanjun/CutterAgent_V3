@@ -9,6 +9,7 @@ Global::Global(){
 
 void Global::init(){
     this->eid=1001000000;
+    this->needTerminate = false;
     //取系统环境变量
     QStringList environment = QProcess::systemEnvironment();
     QString str,ygdir="d:\\nip\\",host="http://e-service.yingroup.com:808/DeviceManager/";

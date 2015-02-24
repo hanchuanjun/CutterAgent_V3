@@ -22,15 +22,17 @@ CutterAltPrc::CutterAltPrc(QObject *parent) :
     //connect(&http,SIGNAL(httpDone(const bool ,const QString ,const QString )),this,SLOT(postedAlt(bool ,QString ,QString)));
 }
 void CutterAltPrc::run(){
+    logger()->info("CutterAltPrc is starting....");
     this->accessManager = new QNetworkAccessManager();
     int i=0;
-    while (true){
+    while (!this->global->needTerminate){
         if (this->isProcessing == false){
             checkAltLogs();
 
         }
         this->sleep(10);
     }
+    logger()->info("CutterAltPrc is stopping....");
 }
 
 void CutterAltPrc::checkAltLogs(){

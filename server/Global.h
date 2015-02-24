@@ -7,6 +7,7 @@ public:
     const static int EVENT_UNKONW =1;
     const static int EVENT_ALERT = 2;
     const static int EVENT_REPORT = 3;
+    bool needTerminate = false;
     Global();
     void init();
 

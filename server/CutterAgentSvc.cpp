@@ -1,13 +1,16 @@
 #include "cutteragentsvc.h"
 
-CutterAgentSvc::CutterAgentSvc(QObject *parent) :
-    QObject(parent)
+CutterAgentSvc::CutterAgentSvc(QObject *parent):QObject(parent)
 {
     conf = new  Global();
     conf->init();
      logger()->info("------------info---------------------constructor");
 
     //printf("conf->licUrl=%s",conf->licUrl);
+}
+
+void  CutterAgentSvc::shutdown(){
+    conf->needTerminate = true;
 }
 
 void CutterAgentSvc::init(){
