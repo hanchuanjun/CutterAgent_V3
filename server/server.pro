@@ -1,4 +1,4 @@
-TARGET   = httpservice
+TARGET   = CutterAgent
 TEMPLATE = app
 CONFIG   += console qt
 QT = core network 

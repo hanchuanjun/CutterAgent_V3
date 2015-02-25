@@ -148,8 +148,10 @@ void CutterOptPrc::postedOptLog(bool ok,QString transid,QString result){
         if (res)
             str =QString("Post %1.evt %2,%3 %4").arg(transid).arg("nok").arg("rename").arg(result);
         else
-
             str =QString("Post %1.evt %2,failed to %3 %4").arg(transid).arg("nok").arg("rename").arg(result);
+        if (!res){
+            logger()->warn(str);
+        }
     }else{
 
         bool res = file.remove();
@@ -161,8 +163,10 @@ void CutterOptPrc::postedOptLog(bool ok,QString transid,QString result){
         }
         if(res)
             str =QString("Post %1.evt %2,Successed to %3 %4").arg(transid).arg("ok").arg("delete").arg(result);
-        else
+        else{
             str =QString("Post %1.evt %2, failed to %3 %4!").arg(transid).arg("ok").arg("delete").arg(result);
+            logger()->warn(str);
+        }
     }
     this->isProcessing=false;
     //emit handled(str);

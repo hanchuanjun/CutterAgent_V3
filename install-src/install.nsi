@@ -2,7 +2,7 @@
 !include nsDialogs.nsh
 ; HM NIS Edit Wizard helper defines
 !define PRODUCT_NAME "CutterAgent"
-!define PRODUCT_VERSION "2.12(rel:20141210)"
+!define PRODUCT_VERSION "3.00(rel:20150225)"
 !define PRODUCT_PUBLISHER "上海和鹰机电科技股份有限公司"
 !define PRODUCT_WEB_SITE "http://www.yingroup.com"
 !define PRODUCT_DIR_REGKEY "Software\Microsoft\Windows\CurrentVersion\App Paths\CutterAgent.exe"
@@ -43,8 +43,8 @@ Page custom nsDialogsPage nsDialogsPageLeave
 ; Instfiles page
 !insertmacro MUI_PAGE_INSTFILES
 ; Finish page
-!define MUI_FINISHPAGE_RUN "$INSTDIR\CutterAgent.exe"
-!insertmacro MUI_PAGE_FINISH
+;!define MUI_FINISHPAGE_RUN 'net start "Cutter Agent Daemon"'
+;!insertmacro MUI_PAGE_FINISH
 
 ; Uninstaller pages
 !insertmacro MUI_UNPAGE_INSTFILES
@@ -63,7 +63,7 @@ InstallDirRegKey HKLM "${PRODUCT_DIR_REGKEY}" ""
 ShowInstDetails show
 ShowUnInstDetails show
 
-;RequestExecutionLevel admin ;Require admin rights on NT6+ (When UAC is turned on)
+RequestExecutionLevel admin ;Require admin rights on NT6+ (When UAC is turned on)
 
 !include LogicLib.nsh
 ;!include AccecssControl.nsh
@@ -147,7 +147,7 @@ true:
         WriteRegStr HKLM "${PRODUCT_HOME_KEY}" "assetid" "$0"
         WriteRegStr HKLM "${PRODUCT_HOME_KEY}" "cuttercontrolpath" "$1"
         WriteRegStr HKLM "${PRODUCT_HOME_KEY}" "server" "http://e-service.yingroup.com:808/DeviceManager"
-        WriteRegStr HKCU "SOFTWARE\Microsoft\Windows\CurrentVersion\Run" "CutterAgent" "$INSTDIR\CutterAgent.exe"
+        ;WriteRegStr HKCU "SOFTWARE\Microsoft\Windows\CurrentVersion\Run" "CutterAgent" "$INSTDIR\CutterAgent.exe"
 
 FunctionEnd
 
@@ -155,21 +155,31 @@ FunctionEnd
 Section "MainSection" SEC01
   SetOutPath "$INSTDIR"
 
-  ExecWait 'taskkill /F /IM CutterAgent.exe'
+  ExecWait 'net stop "Cutter Agent Daemon"'
+  ExecWait '"$INSTDIR/Controller.exe" Cutter Agent Daemon" -u'
   SetOverwrite on
   
   File "CutterAgent.exe"
+  File "Controller.exe"
   CreateDirectory "$SMPROGRAMS\Yingroup\CutterAgent"
-  CreateShortCut "$SMPROGRAMS\Yingroup\CutterAgent\CutterAgent.lnk" "$INSTDIR\CutterAgent.exe"
-  CreateShortCut "$DESKTOP\CutterAgent.lnk" "$INSTDIR\CutterAgent.exe"
+  ;CreateShortCut "$SMPROGRAMS\Yingroup\CutterAgent\CutterAgent.lnk" "$INSTDIR\CutterAgent.exe"
+  ;CreateShortCut "$DESKTOP\CutterAgent.lnk" "$INSTDIR\CutterAgent.exe"
   SetOverwrite ifnewer
-  File "QtCore4.dll"
-  File "mingwm10.dll"
-  File "libqjson.dll"
+  File "log.conf"
+  File "Qt5Core.dll"
+  ;File "mingwm10.dll"
+  File "icudt52.dll"
+  File "icuin52.dll"
+  File "icuuc52.dll"
   File "libgcc_s_dw2-1.dll"
-  File "app.ico"
-  File "QtGui4.dll"
-  File "QtNetwork4.dll"
+  File "libstdc++-6.dll"
+  File "libwinpthread-1.dll"
+  File "Qt5Network.dll"
+  
+  CreateDirectory "$INSTDIR\logs"
+  ExecWait '"$INSTDIR\Controller.exe"  -i "$INSTDIR\CutterAgent.exe"'
+  ExecWait 'sc config "Cutter Agent Daemon" start= auto'
+  ExecWait 'net start "Cutter Agent Daemon"'
 ;add administrator previlege
 ;    ExecWait 'bcdedit /import "$INSTDIR\CutterAgent.exe"'
 SectionEnd
@@ -199,28 +209,33 @@ FunctionEnd
 
 Function un.onInit
 !insertmacro MUI_UNGETLANGUAGE
-  MessageBox MB_ICONQUESTION|MB_YESNO|MB_DEFBUTTON2 "你确实要完全移除 $(^Name) ，其及所有的组件？" IDYES +2
+  MessageBox MB_ICONQUESTION|MB_YESNO|MB_DEFBUTTON2 "卸载本程序将导致裁减服务无法正常运行。确定要完全移除 $(^Name) ，其及所有的组件？" IDYES +2
   Abort
-  ExecWait 'taskkill /F /IM CutterAgent.exe'
+  ExecWait 'net stop "Cutter Agent Daemon" -u'
+  ExecWait '$INSTDIR/Controller.exe "Cutter Agent Daemon" -u'
 FunctionEnd
 
 Section Uninstall
   Delete "$INSTDIR\${PRODUCT_NAME}.url"
   Delete "$INSTDIR\uninst.exe"
-  Delete "$INSTDIR\QtGui4.dll"
+  Delete "$INSTDIR\Qt5Core.dll"
   Delete "$INSTDIR\app.ico"
-  Delete "$INSTDIR\libgcc_s_dw2-1.dll"
-  Delete "$INSTDIR\libqjson.dll"
-  Delete "$INSTDIR\mingwm10.dll"
-  Delete "$INSTDIR\QtCore4.dll"
   Delete "$INSTDIR\CutterAgent.exe"
+  Delete "$INSTDIR\Controller.exe"
+  ;Delete "$INSTDIR\mingwm10.dll"
+  Delete "$INSTDIR\Qt5Network.dll"
+  Delete "$INSTDIR\log.conf"
+  Delete "$INSTDIR\icudt52.dll"
+  Delete "$INSTDIR\icuin52.dll"
+  Delete "$INSTDIR\icuuc52.dll"
+  Delete "$INSTDIR\libgcc_s_dw2-1.dll"
+  Delete "$INSTDIR\libwinpthread-1.dll"
+  Delete "$INSTDIR\libstdc++-6.dll"
 
-  Delete "$INSTDIR\QtNetwork4.dll"
 
   Delete "$SMPROGRAMS\Yingroup\CutterAgent\Uninstall.lnk"
   Delete "$SMPROGRAMS\Yingroup\CutterAgent\Website.lnk"
-  Delete "$DESKTOP\CutterAgent.lnk"
-  Delete "$SMPROGRAMS\Yingroup\CutterAgent\CutterAgent.lnk"
+
 
   RMDir "$SMPROGRAMS\Yingroup\CutterAgent"
   RMDir "$INSTDIR"

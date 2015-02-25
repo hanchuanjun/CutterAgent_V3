@@ -128,7 +128,9 @@ void CutterAltPrc::postedAlt(bool ok,QString transid,QString result){
             retry--;
         }
         str =QString("Post %1.alm %2,%3 %4").arg(transid).arg("nok").arg("rename").arg(result);
-
+        if (!res){
+            logger()->warn(str);
+        }
     }else{
 
         bool res = file.remove();
@@ -140,6 +142,9 @@ void CutterAltPrc::postedAlt(bool ok,QString transid,QString result){
             retry--;
         }
         str =QString("Post %1.alm %2,%3 %4").arg(transid).arg("ok").arg("delete").arg(result);
+        if (!res){
+            logger()->warn(str);
+        }
     }
     this->isProcessing=false;
     qDebug()<<str<<endl;

@@ -116,6 +116,9 @@ void CutterSyncPrc::synced(bool ok,QString transid,QString result){
             src.close();
 
             qDebug()<<"process mt file..2.."<<result<<endl;
+       }else{
+           QString str("Can not write hy info into destination file.");
+           logger()->warn(str);
        }
 
        qDebug()<<"process mt file..3.."<<(src.error()== QFile::NoError)<<src.errorString()<<endl;
@@ -193,6 +196,9 @@ void CutterSyncPrc::finished(){
           //处理错误
           isOk=false;
           result="error";
+          QString errDesc = reply->errorString();
+          QString str=QString("Http error:").append(errDesc);
+          logger()->warn(str);
         }
 
         reply->deleteLater();//要删除reply，但是不能在repyfinished里直接delete，要调用deletelater;

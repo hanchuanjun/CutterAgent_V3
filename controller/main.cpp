@@ -124,6 +124,7 @@ int processArgs(int argc, char **argv)
             }
         }
     }
+    /*
     printf("controller [-i PATH | SERVICE_NAME [-v | -u | -s | -t | -p | -r | -c CODE] | -h] [-w]\n\n"
             "\t-i(nstall) PATH\t: Install the service\n"
             "\t-v(ersion)\t: Print status of the service\n"
@@ -135,6 +136,7 @@ int processArgs(int argc, char **argv)
             "\t-c(ommand) CODE\t: Send a command to the service\n"
             "\t-h(elp)\t\t: Print this help info\n"
             "\t-w(ait)\t\t: Wait for keypress when done\n");
+    */
     return 0;
 }
 
