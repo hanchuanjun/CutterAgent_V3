@@ -222,15 +222,18 @@ Function un.onInit
 !insertmacro MUI_UNGETLANGUAGE
   MessageBox MB_ICONQUESTION|MB_YESNO|MB_DEFBUTTON2 "卸载本程序将导致裁减服务无法正常运行。确定要完全移除 $(^Name) ，其及所有的组件？" IDYES +2
   Abort
-  ExecWait 'net stop "Cutter Agent Daemon" -u'
-  ExecWait '$INSTDIR/Controller.exe "Cutter Agent Daemon" -u'
 FunctionEnd
 
 Section Uninstall
+
+  ;ExecWait 'net stop "Cutter Agent Daemon" -u'
+  ExecWait '$INSTDIR/Controller.exe "Cutter Agent Daemon" -t'
+  ExecWait '$INSTDIR/Controller.exe "Cutter Agent Daemon" -u'
+  
   Delete "$INSTDIR\${PRODUCT_NAME}.url"
   Delete "$INSTDIR\uninst.exe"
   Delete "$INSTDIR\Qt5Core.dll"
-  Delete "$INSTDIR\app.ico"
+  ;Delete "$INSTDIR\app.ico"
   Delete "$INSTDIR\CutterAgent.exe"
   Delete "$INSTDIR\Controller.exe"
   ;Delete "$INSTDIR\mingwm10.dll"
