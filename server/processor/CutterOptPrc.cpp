@@ -21,6 +21,7 @@ void CutterOptPrc::run(){
     while (!this->global->needTerminate){
         if (this->isProcessing == false){
             checkOptLogs();
+            logger()->debug(!this->isProcessing?"CutterOptPrc is processing alarm files ...":"CutterOptPrc is not processing alarm files ...");
 
         }
         this->sleep(10);
@@ -54,16 +55,19 @@ void CutterOptPrc::checkOptLogs(){
             bool result = src.rename(dest);
             qDebug()<<"rename "<<file<<" to "<<dest<<(result?"true":"false")<<endl;
             if(result){
+                //由于http异步，因此，一次只处理一个，等待http异步返回
+                this->isProcessing=true;
                 //如果更名成功，则上传记录，并等待
                 this->uploadOptLog(evtid,log,drpt,mrpt);
                 delete log;
                 delete drpt;
                 delete mrpt;
-                //由于http异步，因此，一次只处理一个，等待http异步返回
-                this->isProcessing=true;
+                logger()->debug(QString("Handle opt file[").append(file).append("->").append(dest)
+                                .append(") and upload it!"));
                 break;
             }else{
                 //如果更名不成,则放弃,然后执行下一个文件,当前文件下次循环再处理
+                logger()->warn(QString("Failed to rename ").append(file).append(" to ").append(dest));
 
             }
 
@@ -145,9 +149,10 @@ void CutterOptPrc::postedOptLog(bool ok,QString transid,QString result){
             res=file.rename(global->optLogPath+transid+".evt");
             retry--;
         }
-        if (res)
+        if (res){
             str =QString("Post %1.evt %2,%3 %4").arg(transid).arg("nok").arg("rename").arg(result);
-        else
+            logger()->debug(str);
+        }else
             str =QString("Post %1.evt %2,failed to %3 %4").arg(transid).arg("nok").arg("rename").arg(result);
         if (!res){
             logger()->warn(str);
@@ -161,9 +166,10 @@ void CutterOptPrc::postedOptLog(bool ok,QString transid,QString result){
             res=file.remove();
             retry--;
         }
-        if(res)
+        if(res){
             str =QString("Post %1.evt %2,Successed to %3 %4").arg(transid).arg("ok").arg("delete").arg(result);
-        else{
+            logger()->debug(str);
+        }else{
             str =QString("Post %1.evt %2, failed to %3 %4!").arg(transid).arg("ok").arg("delete").arg(result);
             logger()->warn(str);
         }
@@ -202,8 +208,6 @@ bool CutterOptPrc::post(const QString urlStr,QMap<QString,QString> &map){
       connect(reply, SIGNAL(finished()), this, SLOT(finished()));
       connect(reply, SIGNAL(readyRead()), this, SLOT(readyRead()));
 
-
-      this->isProcessing = true;
       this->exec();
     return true;
 

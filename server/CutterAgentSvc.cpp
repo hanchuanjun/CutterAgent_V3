@@ -4,8 +4,8 @@ CutterAgentSvc::CutterAgentSvc(QObject *parent):QObject(parent)
 {
     conf = new  Global();
     conf->init();
-     logger()->info("------------info---------------------constructor");
 
+    logger()->info("CutterAgentSvc is initialized...");
     //printf("conf->licUrl=%s",conf->licUrl);
 }
 
@@ -15,7 +15,7 @@ void  CutterAgentSvc::shutdown(){
 
 void CutterAgentSvc::init(){
 
-    logger()->debug("-------------Debug--------------------constructor");
+    logger()->info("CutterAgentSvc is initializing...");
     licProcessor=new CutterSyncPrc(this);
     licProcessor->setGlobal(conf);
     licProcessor->start();

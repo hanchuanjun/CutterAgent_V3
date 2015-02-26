@@ -28,7 +28,7 @@ void CutterAltPrc::run(){
     while (!this->global->needTerminate){
         if (this->isProcessing == false){
             checkAltLogs();
-
+            logger()->debug(this->isProcessing?"CutterAltPrc is not processing alarm files ...":"CutterAltPrc is processing alarm files ...");
         }
         this->sleep(10);
     }
@@ -56,11 +56,17 @@ void CutterAltPrc::checkAltLogs(){
             bool result = src.rename(dest);
             qDebug()<<file<<" to "<<dest<<"  " <<result<<endl;
             if (result){
-                this->uploadEvt(evtid,log);
-                delete log;
+
                 //由于http异步，因此，一次只处理一个，等待http异步返回
                 this->isProcessing=true;
+
+                this->uploadEvt(evtid,log);
+                delete log;
+                logger()->debug(QString("Handle opt file[").append(file).append("->").append(dest)
+                                .append(") and upload it!"));
                 break;
+            }else{
+                logger()->warn(QString("Failed to rename ").append(file).append(" to ").append(dest));
             }
 
         }
@@ -141,8 +147,16 @@ void CutterAltPrc::postedAlt(bool ok,QString transid,QString result){
             res=file.remove();
             retry--;
         }
-        str =QString("Post %1.alm %2,%3 %4").arg(transid).arg("ok").arg("delete").arg(result);
+/*        str =QString("Post %1.alm %2,%3 %4").arg(transid).arg("ok").arg("delete").arg(result);
         if (!res){
+            logger()->warn(str);
+        }
+   */
+        if(res){
+            str =QString("Post %1.evt %2,Successed to %3 %4").arg(transid).arg("ok").arg("delete").arg(result);
+            logger()->debug(str);
+        }else{
+            str =QString("Post %1.evt %2, failed to %3 %4!").arg(transid).arg("ok").arg("delete").arg(result);
             logger()->warn(str);
         }
     }
@@ -182,7 +196,6 @@ bool CutterAltPrc::post(const QString urlStr,QMap<QString,QString> &map){
       connect(reply, SIGNAL(readyRead()), this, SLOT(readyRead()));
 
 
-      this->isProcessing = true;
       this->exec();
     return true;
 
@@ -191,7 +204,8 @@ bool CutterAltPrc::post(const QString urlStr,QMap<QString,QString> &map){
 void CutterAltPrc::readyRead(){
 
     //cout<<"result:"<<text<<endl;
-    printf("ReadyRead result:");
+    //printf("ReadyRead result:");
+
 }
 
 void CutterAltPrc::finished(){

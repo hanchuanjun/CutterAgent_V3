@@ -44,7 +44,7 @@ Page custom nsDialogsPage nsDialogsPageLeave
 !insertmacro MUI_PAGE_INSTFILES
 ; Finish page
 ;!define MUI_FINISHPAGE_RUN 'net start "Cutter Agent Daemon"'
-;!insertmacro MUI_PAGE_FINISH
+!insertmacro MUI_PAGE_FINISH
 
 ; Uninstaller pages
 !insertmacro MUI_UNPAGE_INSTFILES
@@ -165,7 +165,7 @@ Section "MainSection" SEC01
   ;CreateShortCut "$SMPROGRAMS\Yingroup\CutterAgent\CutterAgent.lnk" "$INSTDIR\CutterAgent.exe"
   ;CreateShortCut "$DESKTOP\CutterAgent.lnk" "$INSTDIR\CutterAgent.exe"
   SetOverwrite ifnewer
-  File "log.conf"
+  ;File "log.conf"
   File "Qt5Core.dll"
   ;File "mingwm10.dll"
   File "icudt52.dll"
@@ -177,6 +177,17 @@ Section "MainSection" SEC01
   File "Qt5Network.dll"
   
   CreateDirectory "$INSTDIR\logs"
+  
+  FileOpen $4 "$INSTDIR\log.conf" w
+  FileWrite $4 "log4j.rootLogger=DEBUG,A1$\r$\n"
+  FileWrite $4 "log4j.appender.A1=org.apache.log4j.DailyRollingFileAppender$\r$\n"
+  FileWrite $4 "log4j.appender.A1.File=/logs/a1.log$\r$\n"
+  FileWrite $4 "log4j.appender.A1.DatePattern=yyyy-MM-dd'.log'$\r$\n"
+  FileWrite $4 "log4j.appender.A1.AppendFile = TRUE$\r$\n"
+  FileWrite $4 "log4j.appender.A1.layout=org.apache.log4j.PatternLayout$\r$\n"
+  FileWrite $4 "log4j.appender.A1.layout.ConversionPattern=%-d{yyyy-MM-dd HH:mm:ss} [%c]-[%p] %m%n$\r$\n"
+  FileClose $4
+  
   ExecWait '"$INSTDIR\Controller.exe"  -i "$INSTDIR\CutterAgent.exe"'
   ExecWait 'sc config "Cutter Agent Daemon" start= auto'
   ExecWait 'net start "Cutter Agent Daemon"'

@@ -144,7 +144,7 @@ public:
     CutterAgentService(int argc, char **argv)
     : QtService<QCoreApplication>(argc, argv, "Cutter Agent Daemon")
     {
-        setServiceDescription("An application of Yingroup(V3.0.0,build 2015.2.25), Don't stop it!");
+        setServiceDescription("An application of Yingroup(V3.0.0,build 2015.2.26), Don't stop it!");
         setServiceFlags(QtServiceBase::CanBeSuspended);
     }
 
@@ -162,10 +162,11 @@ protected:
     }
 
     void processCommand(int code){
-        logMessage(QString("Recieve command: %1").arg(code), QtServiceBase::Information);
+        //logMessage(QString("Recieve command: %1").arg(code), QtServiceBase::Information);
         Log4Qt::Logger::logger(QLatin1String("Service"))->info(QString("Recieve command: %1").arg(code));
 
-        Log4Qt::Logger *a1 = Log4Qt::Logger::logger("A1");
+        Log4Qt::Logger *a1 = Log4Qt::Logger::rootLogger();
+
         if (code <=0){
             a1->setLevel(Log4Qt::Level::OFF_INT);
         }else if (code ==1){
@@ -174,11 +175,12 @@ protected:
             a1->setLevel(Log4Qt::Level::INFO_INT);
         }else if (code ==3){
             a1->setLevel(Log4Qt::Level::ERROR_INT);
-        }else if (code ==3){
+        }else if (code ==4){
             a1->setLevel(Log4Qt::Level::FATAL_INT);
         }else {
             a1->setLevel(Log4Qt::Level::ALL_INT);
         }
+
         Log4Qt::Logger::logger(QLatin1String("Service"))->info(QString("info!"));
         Log4Qt::Logger::logger(QLatin1String("Service"))->debug(QString("debug!"));
 
