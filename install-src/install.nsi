@@ -2,7 +2,7 @@
 !include nsDialogs.nsh
 ; HM NIS Edit Wizard helper defines
 !define PRODUCT_NAME "CutterAgent"
-!define PRODUCT_VERSION "3.00(rel:20150225)"
+!define PRODUCT_VERSION "v3.00(build_201502261226)"
 !define PRODUCT_PUBLISHER "上海和鹰机电科技股份有限公司"
 !define PRODUCT_WEB_SITE "http://www.yingroup.com"
 !define PRODUCT_DIR_REGKEY "Software\Microsoft\Windows\CurrentVersion\App Paths\CutterAgent.exe"
@@ -57,7 +57,7 @@ Page custom nsDialogsPage nsDialogsPageLeave
 ; MUI end ------
 
 Name "${PRODUCT_NAME} ${PRODUCT_VERSION}"
-OutFile "Setup.exe"
+OutFile "${PRODUCT_NAME}_${PRODUCT_VERSION}.exe"
 InstallDir "$PROGRAMFILES\Yingroup\CutterAgent"
 InstallDirRegKey HKLM "${PRODUCT_DIR_REGKEY}" ""
 ShowInstDetails show
@@ -179,7 +179,7 @@ Section "MainSection" SEC01
   CreateDirectory "$INSTDIR\logs"
   
   FileOpen $4 "$INSTDIR\log.conf" w
-  FileWrite $4 "log4j.rootLogger=DEBUG,A1$\r$\n"
+  FileWrite $4 "log4j.rootLogger=INFO,A1$\r$\n"
   FileWrite $4 "log4j.appender.A1=org.apache.log4j.DailyRollingFileAppender$\r$\n"
   FileWrite $4 "log4j.appender.A1.File=/logs/a1.log$\r$\n"
   FileWrite $4 "log4j.appender.A1.DatePattern=yyyy-MM-dd'.log'$\r$\n"
